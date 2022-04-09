@@ -4,7 +4,7 @@ import IsEmail from "isemail";
 
 const UserSchema = new mongoose.Schema({
     role: {
-        type: String,
+        type: String, 
         required: true,
         enum: ["Doctor", "Patient", "Admin"],
     },
@@ -49,7 +49,7 @@ const UserSchema = new mongoose.Schema({
     },
     gender: {
         type: String,
-        enum: ['MALE', 'FEMALE'],
+        enum: ["MALE", "FEMALE"],
     },
     isEmailVerified: {
         type: Boolean,
@@ -61,7 +61,7 @@ const UserSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['ACTIVE', 'DISABLED'],
+        enum: ["ACTIVE", "DISABLED"],
     },
     statusUpdatedAt: {
         type: Date,
@@ -77,20 +77,21 @@ const UserSchema = new mongoose.Schema({
         minlength: 8,
         maxlength: 100,
         validate: {
-            validator: function (password: string) {
+            validator: function (password: string){
                 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
                 return passwordRegex.test(String(password));
             },
             message: "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character"
         }
     },
-    resetPasswordToken: { type: String },
-    resetPasswordExpires: { type: Date }
-}, { timestamps: true,toJSON: {
-    virtuals: true 
-    } });
+    resetPasswordToken: {type: String},
+    resetPasswordExpires: {type: Date}
+}, {
+    timestamps: true,
+    toJSON: {virtuals: true}
+});
 
-UserSchema.methods.toJSON = function () {
+UserSchema.methods.toJSON = function (){
     const user = this.toObject();
     delete user.password;
     delete user.resetPasswordToken;
@@ -98,8 +99,8 @@ UserSchema.methods.toJSON = function () {
     return user;
 };
 
-UserSchema.pre("save", async function (next) {
-    if (this.isModified("password")) {
+UserSchema.pre("save", async function (next){
+    if (this.isModified("password")){
         const hashedPassword = await bcrypt.hash(this.password, 10);
         this.password = hashedPassword;
     }

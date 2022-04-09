@@ -8,7 +8,7 @@ declare global {
         promise: Promise<mongoose.Connection | mongoose.Mongoose> | null,
     };
 }
-let cached = global.mongoose;
+let cached = global.mongoose; 
  
 if (!cached){
     cached = global.mongoose = {

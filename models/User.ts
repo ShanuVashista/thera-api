@@ -4,7 +4,7 @@ import IsEmail from "isemail";
 import generateToken from "../utils/generateToken";
 
 const UserSchema = new mongoose.Schema({
-    role: {
+    role: { 
         type: String,
         required: true,
         enum: ["Doctor", "Patient", "Admin"],
@@ -50,11 +50,9 @@ const UserSchema = new mongoose.Schema({
     },
     gender: {
         type: String,
-        enum: ['MALE', 'FEMALE'],
+        enum: ["MALE", "FEMALE"],
     },
-    healthCard: {
-        type: String,
-    },
+    healthCard: {type: String},
     isEmailVerified: {
         type: Boolean,
         default: false
@@ -83,7 +81,7 @@ const UserSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['ACTIVE', 'DISABLED'],
+        enum: ["ACTIVE", "DISABLED"],
     },
     statusUpdatedAt: {
         type: Date,
@@ -99,18 +97,21 @@ const UserSchema = new mongoose.Schema({
         minlength: 8,
         maxlength: 100,
         validate: {
-            validator: function (password: string) {
+            validator: function (password: string){
                 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
                 return passwordRegex.test(String(password));
             },
             message: "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character"
         }
     },
-    resetPasswordToken: { type: String },
-    resetPasswordExpires: { type: Date }
-}, { timestamps: true, strict: "throw" });
+    resetPasswordToken: {type: String},
+    resetPasswordExpires: {type: Date}
+}, {
+    timestamps: true,
+    strict: "throw"
+});
 
-UserSchema.methods.toJSON = function () {
+UserSchema.methods.toJSON = function (){
     const user = this.toObject();
     delete user.password;
     delete user.resetPasswordToken;
@@ -120,26 +121,26 @@ UserSchema.methods.toJSON = function () {
     return user;
 };
 
-UserSchema.pre("validate", function () {
+UserSchema.pre("validate", function (){
     // parse dob string to date
-    if (this.dob) {
+    if (this.dob){
         this.dob = Date.parse(this.dob);
     }
-})
+});
 
-UserSchema.pre("save", async function (next) {
-    if (this.isModified("password")) {
+UserSchema.pre("save", async function (next){
+    if (this.isModified("password")){
         const hashedPassword = await bcrypt.hash(this.password, 10);
         this.password = hashedPassword;
     }
 
-    if (this.isModified("email")) {
+    if (this.isModified("email")){
         this.email = this.email.toLowerCase();
         this.isEmailVerified = false;
         this.emailVerificationToken = generateToken();
     }
 
-    if (this.isModified("phone")) {
+    if (this.isModified("phone")){
         this.phone = this.phone.replace(/\D/g, "");
         this.isPhoneVerified = false;
         this.phoneVerificationToken = generateToken();
@@ -149,23 +150,23 @@ UserSchema.pre("save", async function (next) {
 });
 
 // verify email token
-UserSchema.methods.verifyEmailToken = async function (token: string) {
-    if (!this.emailVerificationToken) {
+UserSchema.methods.verifyEmailToken = async function (token: string){
+    if (!this.emailVerificationToken){
         throw new Error("Email verification token is not set");
     }
 
-    if (this.emailVerificationToken.token !== token) {
+    if (this.emailVerificationToken.token !== token){
         throw new Error("Invalid email verification token");
     }
 
-    if (this.emailVerificationToken.expires < Date.now()) {
+    if (this.emailVerificationToken.expires < Date.now()){
         throw new Error("Email verification token has expired");
     }
 
     this.isEmailVerified = true;
     this.emailVerificationToken = null;
-    await this.save({ validateBeforeSave: false });
-}
+    await this.save({validateBeforeSave: false});
+};
 
 const model = mongoose.models.User || mongoose.model("User", UserSchema);
 export default model;

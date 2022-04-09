@@ -7,7 +7,7 @@ interface Cached {
         nodemailer.Transporter<SMTPTransport.SentMessageInfo>
     > | null;
 }
- 
+
 interface EmailCredentials {
     user: string;
     pass: string;
