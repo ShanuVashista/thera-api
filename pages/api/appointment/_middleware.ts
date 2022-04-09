@@ -1,7 +1,8 @@
-import {NextRequest, NextResponse} from "next/server";
-import * as jwt from "jsonwebtoken";
+import type {NextRequest} from "next/server";
+import {NextResponse} from "next/server";
+import jwt from "jsonwebtoken";
 
-export async function middleware (req: NextRequest){
+export function middleware (req: NextRequest){
     try {
         if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET is not defined");
         const response = NextResponse.next();
