@@ -10,20 +10,26 @@ export default async function handler (
 ){
     const {method} = req;
     await dbConnect();
-    let checkForHexRegExp = /^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i
+    const checkForHexRegExp = /^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i;
+
     switch (method){
         case "GET":
             try {
                 let cond = {};
-                if(typeof (req.query.id) != 'undefined' && req.query.id != null){
-                    if(!checkForHexRegExp.test(req.query['id'] as string)){
-                        res.status(400).json({success: false,message:'Faild to match required pattern for Appointment Id'});
+
+                if(typeof (req.query.id) != "undefined" && req.query.id != null){
+                    if(!checkForHexRegExp.test(req.query["id"] as string)){
+                        res.status(400).json({
+                            success: false,
+                            message: "Faild to match required pattern for Appointment Id"
+                        });
                     }else{
-                        cond = {'_id': req.query.id}
+                        cond = {_id: req.query.id};
                     }
                 }
                 
-                const appointmentdetails = await Appointment.find(cond).populate('doctor').populate('patient')
+                const appointmentdetails = await Appointment.find(cond).populate("doctor").populate("patient");
+
                 if(appointmentdetails.length){
                     res.status(200).json({
                         success: true,
@@ -38,33 +44,53 @@ export default async function handler (
                 }
             } catch (error: any){
                 console.log(error);
-                
-                res.status(400).json({success: false,message:error.message});
+
+                res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
             }
 
             break;
         case "POST":
             try {
                 if(!checkForHexRegExp.test(req.body.doctorId)){
-                    res.status(400).json({success: false,message:'Faild to match required pattern for Doctor Id'});
+                    res.status(400).json({
+                        success: false,
+                        message: "Faild to match required pattern for Doctor Id"
+                    });
                 }else{
-                    let doctor = await User.find({'_id':req.body.doctorId});
+                    const doctor = await User.find({_id: req.body.doctorId});
+
                     if(doctor.length == 0){
-                        res.status(400).json({success: false,message:'Doctor is not exist'});
+                        res.status(400).json({
+                            success: false,
+                            message: "Doctor is not exist"
+                        });
                     }
                 }
+
                 if(!checkForHexRegExp.test(req.body.patientId)){
-                    res.status(400).json({success: false,message:'Faild to match required pattern for Patient Id'});
+                    res.status(400).json({
+                        success: false,
+                        message: "Faild to match required pattern for Patient Id"
+                    });
                 }else{
-                    let patient = await User.find({'_id':req.body.patientId});
+                    const patient = await User.find({_id: req.body.patientId});
+
                     if(patient.length == 0){
-                        res.status(400).json({success: false,message:'Patient is not exist'});
+                        res.status(400).json({
+                            success: false,
+                            message: "Patient is not exist"
+                        });
                     }
                 }
+
                 let appointcreate = await Appointment.create(req.body);
                 appointcreate = JSON.parse(JSON.stringify(appointcreate));
                 let appointmentdetails = {};
-                if(typeof (appointcreate) != 'undefined' && appointcreate != null){
+
+                if(typeof (appointcreate) != "undefined" && appointcreate != null){
                     // let doctorandpatientdetails = await User.find({'_id': {$in:[req.body.doctorId,req.body.patientId]}});
                     // doctorandpatientdetails = JSON.parse(JSON.stringify(doctorandpatientdetails))
                     // doctorandpatientdetails.map( (e) => {
@@ -75,9 +101,9 @@ export default async function handler (
                     //         appointcreate['patient_details'] = e
                     //     }
                     // })   
-                    appointmentdetails = await Appointment.find({'_id':appointcreate._id}).populate('doctor').populate('patient')
-                                  
+                    appointmentdetails = await Appointment.find({_id: appointcreate._id}).populate("doctor").populate("patient");
                 }
+
                 res.status(201).json({
                     success: true,
                     message: "Appointment Created Successfully",
@@ -97,37 +123,59 @@ export default async function handler (
             break;
         case "PUT":
             try {
-                if(typeof (req.body._id) != 'undefined' && req.body._id != null){
-                    if(!checkForHexRegExp.test(req.body['_id'] as string)){
-                        res.status(400).json({success: false,message:'Faild to match required pattern for Appointment Id'});
+                if(typeof (req.body._id) != "undefined" && req.body._id != null){
+                    if(!checkForHexRegExp.test(req.body["_id"] as string)){
+                        res.status(400).json({
+                            success: false,
+                            message: "Faild to match required pattern for Appointment Id"
+                        });
                     }
                 }
-                if(typeof (req.body.doctorId) != 'undefined' && req.body.doctorId != null){
+
+                if(typeof (req.body.doctorId) != "undefined" && req.body.doctorId != null){
                     if(!checkForHexRegExp.test(req.body.doctorId)){
-                        res.status(400).json({success: false,message:'Faild to match required pattern for Doctor Id'});
+                        res.status(400).json({
+                            success: false,
+                            message: "Faild to match required pattern for Doctor Id"
+                        });
                     }else{
-                        let doctor = await User.find({'_id':req.body.doctorId});
+                        const doctor = await User.find({_id: req.body.doctorId});
+
                         if(doctor.length == 0){
-                            res.status(400).json({success: false,message:'Doctor is not exist'});
+                            res.status(400).json({
+                                success: false,
+                                message: "Doctor is not exist"
+                            });
                         }
                     }
                 }
-                if(typeof (req.body.patientId) != 'undefined' && req.body.patientId != null){
-                if(!checkForHexRegExp.test(req.body.patientId)){
-                    res.status(400).json({success: false,message:'Faild to match required pattern for Patient Id'});
-                }else{
-                    let patient = await User.find({'_id':req.body.patientId});
-                    if(patient.length == 0){
-                        res.status(400).json({success: false,message:'Patient is not exist'});
+
+                if(typeof (req.body.patientId) != "undefined" && req.body.patientId != null){
+                    if(!checkForHexRegExp.test(req.body.patientId)){
+                        res.status(400).json({
+                            success: false,
+                            message: "Faild to match required pattern for Patient Id"
+                        });
+                    }else{
+                        const patient = await User.find({_id: req.body.patientId});
+
+                        if(patient.length == 0){
+                            res.status(400).json({
+                                success: false,
+                                message: "Patient is not exist"
+                            });
+                        }
                     }
                 }
-            }
-                let appointupdate = await Appointment.findByIdAndUpdate(req.body._id,req.body,{new:true})
+
+                let appointupdate = await Appointment.findByIdAndUpdate(req.body._id, req.body, {new: true});
                 appointupdate = JSON.parse(JSON.stringify(appointupdate));
                 let appointmentdetails: string | any[] = [];
-                if(typeof (appointupdate) != 'undefined' && appointupdate != null){
-                    appointmentdetails = await Appointment.find({'_id':appointupdate._id}).populate('doctor').populate('patient')              
+
+                if(typeof (appointupdate) != "undefined" && appointupdate != null){
+                    appointmentdetails = await Appointment.find({_id: appointupdate._id}).populate("doctor").populate("patient");              
                 }
+
                 if(appointmentdetails.length){
                     res.status(202).json({
                         success: true,
@@ -154,14 +202,20 @@ export default async function handler (
             break;
         case "DELETE":
             try {
-                if(typeof (req.body._id) != 'undefined' && req.body._id != null){
-                    if(!checkForHexRegExp.test(req.body['_id'] as string)){
-                        res.status(400).json({success: false,message:'Faild to match required pattern for Appointment Id'});
+                if(typeof (req.body._id) != "undefined" && req.body._id != null){
+                    if(!checkForHexRegExp.test(req.body["_id"] as string)){
+                        res.status(400).json({
+                            success: false,
+                            message: "Faild to match required pattern for Appointment Id"
+                        });
                     }
                 }
-                let appointmentdetails = await Appointment.find({'_id':req.body._id})
+
+                const appointmentdetails = await Appointment.find({_id: req.body._id});
+
                 if(appointmentdetails.length){
-                    let appointdelete = await Appointment.findByIdAndDelete(req.body._id);
+                    const appointdelete = await Appointment.findByIdAndDelete(req.body._id);
+
                     res.status(202).json({
                         success: true,
                         message: "Appointment Deleted Successfully",
